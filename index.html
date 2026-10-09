@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>生命靈數計算</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap">
+<style>
+  :root {
+    --bg: #f2ede1;
+    --paper: #fbf8f1;
+    --ink: #232722;
+    --ink-soft: #5c645a;
+    --line: #ddd5c3;
+    --gold: #a3822f;
+    --gold-strong: #8a6a1f;
+    --teal: #1f3d38;
+    --coral: #b5563a;
+    --shadow: 0 1px 2px rgba(35,39,34,.06), 0 8px 24px rgba(35,39,34,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12201d;
+      --paper: #182c27;
+      --ink: #efe9da;
+      --ink-soft: #a6ad9f;
+      --line: #2c443d;
+      --gold: #d6b45c;
+      --gold-strong: #e8c876;
+      --teal: #cfe4dc;
+      --coral: #e08d6f;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12201d;
+    --paper: #182c27;
+    --ink: #efe9da;
+    --ink-soft: #a6ad9f;
+    --line: #2c443d;
+    --gold: #d6b45c;
+    --gold-strong: #e8c876;
+    --teal: #cfe4dc;
+    --coral: #e08d6f;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", sans-serif;
+    padding: 40px 20px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 640px; margin: 0 auto; }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .brand .dots { display: flex; gap: 4px; }
+  .brand .dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+    opacity: .35;
+  }
+  .brand .dots span:nth-child(4) { opacity: 1; }
+  .brand .label {
+    font-size: 12px;
+    letter-spacing: .18em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    text-align: center;
+    font-size: clamp(28px, 6vw, 40px);
+    margin: 4px 0 8px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .tagline {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 15px;
+    margin: 0 0 36px;
+    line-height: 1.7;
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 28px 26px;
+    margin-bottom: 20px;
+  }
+  .card h2 {
+    font-family: "Noto Serif TC", serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+
+  .date-row { display: flex; gap: 12px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: .04em;
+  }
+  .field input {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 18px;
+    padding: 11px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100%;
+    text-align: center;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  button.primary {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: var(--teal);
+    color: var(--paper);
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .04em;
+    cursor: pointer;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) button.primary { color: #0e1a17; }
+  }
+  :root[data-theme="dark"] button.primary { color: #0e1a17; }
+  button.primary:active { opacity: .85; }
+
+  .example-note {
+    font-size: 12px;
+    color: var(--gold-strong);
+    text-align: center;
+    margin: -8px 0 18px;
+    letter-spacing: .03em;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--line);
+    margin: 26px 0 22px;
+  }
+  .path {
+    position: relative;
+    padding-left: 28px;
+  }
+  .path::before {
+    content: "";
+    position: absolute;
+    left: 9px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--line);
+  }
+  .stage {
+    position: relative;
+    padding: 4px 0 26px;
+  }
+  .stage:last-child { padding-bottom: 4px; }
+  .stage::before {
+    content: "";
+    position: absolute;
+    left: -28px;
+    top: 6px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--gold);
+  }
+  .stage.final::before {
+    background: var(--gold);
+  }
+  .stage-label {
+    font-size: 12px;
+    color: var(--ink-soft);
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .stage-chain {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 15px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .stage-chain .arrow { color: var(--line); font-size: 13px; }
+  .stage-chain .final-num {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--coral);
+  }
+  .stage-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    line-height: 1.6;
+  }
+
+  .result-title {
+    font-family: "Noto Serif TC", serif;
+    font-size: 15px;
+    color: var(--ink-soft);
+    margin: 0 0 4px;
+  }
+  .result-headline {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0 0 22px;
+    color: var(--teal);
+  }
+  .result-headline .num { color: var(--coral); }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  button.secondary {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font-family: "Noto Sans TC", sans-serif;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  button.secondary:hover { border-color: var(--gold); }
+
+  .privacy {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-top: 28px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 36px;
+    letter-spacing: .04em;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .card.input-card, .actions, .privacy, .brand, footer { display: none !important; }
+    .card.result-card {
+      box-shadow: none;
+      border: none;
+      padding: 40px 10px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .date-row { flex-wrap: wrap; }
+    .field { min-width: 28%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="brand">
+    <div class="dots"><span></span><span></span><span></span><span></span></div>
+    <span class="label">數字講堂</span>
+  </div>
+  <h1>生命靈數計算</h1>
+  <p class="tagline">輸入你的國曆出生年月日，同時看見事業與感情兩組數字能量</p>
+
+  <div class="card input-card">
+    <h2>1 · 你的出生年月日（國曆）</h2>
+    <div class="date-row">
+      <div class="field">
+        <label for="y">年</label>
+        <input id="y" type="number" inputmode="numeric" placeholder="1999" min="1900" max="2100">
+      </div>
+      <div class="field">
+        <label for="m">月</label>
+        <input id="m" type="number" inputmode="numeric" placeholder="3" min="1" max="12">
+      </div>
+      <div class="field">
+        <label for="d">日</label>
+        <input id="d" type="number" inputmode="numeric" placeholder="12" min="1" max="31">
+      </div>
+    </div>
+    <button class="primary" onclick="calc()">開始解析</button>
+  </div>
+
+  <p class="example-note" id="exampleNote">目前顯示範例（1999 / 3 / 12）— 輸入你自己的生日再按一次「開始解析」</p>
+
+  <div class="card result-card" id="resultCard">
+    <p class="result-title">國曆生日 → 事業能量</p>
+    <p class="result-headline">主要能量 <span class="num" id="mainNumCareer">7</span> 號</p>
+    <div class="path" id="pathCareer"></div>
+
+    <div class="divider"></div>
+
+    <p class="result-title">農曆生日（<span id="lunarDateLabel">—</span>） → 感情能量</p>
+    <p class="result-headline">主要能量 <span class="num" id="mainNumLove">7</span> 號</p>
+    <div class="path" id="pathLove"></div>
+
+    <div class="actions">
+      <button class="secondary" onclick="window.print()">列印 / 儲存為 PDF</button>
+      <button class="secondary" onclick="resetForm()">重新計算</button>
+    </div>
+  </div>
+
+  <p class="privacy">你輸入的生日只會在這個網頁裡計算，不會被傳送或留存在任何伺服器上。<br>要保留結果，用上面的「列印 / 儲存為 PDF」存在自己的裝置裡。</p>
+
+  <footer>數字講堂 · 生命靈數第一堂課</footer>
+</div>
+
+<script>
+/* ---- 國曆↔農曆換算（isee15/Lunar-Solar-Calendar-Converter，公開資料，涵蓋 1900-2100）---- */
+const lunar_month_days = [1887, 0x1694, 0x16aa, 0x4ad5, 0xab6, 0xc4b7, 0x4ae, 0xa56, 0xb52a, 0x1d2a, 0xd54, 0x75aa, 0x156a, 0x1096d, 0x95c, 0x14ae, 0xaa4d, 0x1a4c, 0x1b2a, 0x8d55, 0xad4, 0x135a, 0x495d, 0x95c, 0xd49b, 0x149a, 0x1a4a, 0xbaa5, 0x16a8, 0x1ad4, 0x52da, 0x12b6, 0xe937, 0x92e, 0x1496, 0xb64b, 0xd4a, 0xda8, 0x95b5, 0x56c, 0x12ae, 0x492f, 0x92e, 0xcc96, 0x1a94, 0x1d4a, 0xada9, 0xb5a, 0x56c, 0x726e, 0x125c, 0xf92d, 0x192a, 0x1a94, 0xdb4a, 0x16aa, 0xad4, 0x955b, 0x4ba, 0x125a, 0x592b, 0x152a, 0xf695, 0xd94, 0x16aa, 0xaab5, 0x9b4, 0x14b6, 0x6a57, 0xa56, 0x1152a, 0x1d2a, 0xd54, 0xd5aa, 0x156a, 0x96c, 0x94ae, 0x14ae, 0xa4c, 0x7d26, 0x1b2a, 0xeb55, 0xad4, 0x12da, 0xa95d, 0x95a, 0x149a, 0x9a4d, 0x1a4a, 0x11aa5, 0x16a8, 0x16d4, 0xd2da, 0x12b6, 0x936, 0x9497, 0x1496, 0x1564b, 0xd4a, 0xda8, 0xd5b4, 0x156c, 0x12ae, 0xa92f, 0x92e, 0xc96, 0x6d4a, 0x1d4a, 0x10d65, 0xb58, 0x156c, 0xb26d, 0x125c, 0x192c, 0x9a95, 0x1a94, 0x1b4a, 0x4b55, 0xad4, 0xf55b, 0x4ba, 0x125a, 0xb92b, 0x152a, 0x1694, 0x96aa, 0x15aa, 0x12ab5, 0x974, 0x14b6, 0xca57, 0xa56, 0x1526, 0x8e95, 0xd54, 0x15aa, 0x49b5, 0x96c, 0xd4ae, 0x149c, 0x1a4c, 0xbd26, 0x1aa6, 0xb54, 0x6d6a, 0x12da, 0x1695d, 0x95a, 0x149a, 0xda4b, 0x1a4a, 0x1aa4, 0xbb54, 0x16b4, 0xada, 0x495b, 0x936, 0xf497, 0x1496, 0x154a, 0xb6a5, 0xda4, 0x15b4, 0x6ab6, 0x126e, 0x1092f, 0x92e, 0xc96, 0xcd4a, 0x1d4a, 0xd64, 0x956c, 0x155c, 0x125c, 0x792e, 0x192c, 0xfa95, 0x1a94, 0x1b4a, 0xab55, 0xad4, 0x14da, 0x8a5d, 0xa5a, 0x1152b, 0x152a, 0x1694, 0xd6aa, 0x15aa, 0xab4, 0x94ba, 0x14b6, 0xa56, 0x7527, 0xd26, 0xee53, 0xd54, 0x15aa, 0xa9b5, 0x96c, 0x14ae, 0x8a4e, 0x1a4c, 0x11d26, 0x1aa4, 0x1b54, 0xcd6a, 0xada, 0x95c, 0x949d, 0x149a, 0x1a2a, 0x5b25, 0x1aa4, 0xfb52, 0x16b4, 0xaba, 0xa95b, 0x936, 0x1496, 0x9a4b, 0x154a, 0x136a5, 0xda4, 0x15ac];
+const solar_1_1 = [1887, 0xec04c, 0xec23f, 0xec435, 0xec649, 0xec83e, 0xeca51, 0xecc46, 0xece3a, 0xed04d, 0xed242, 0xed436, 0xed64a, 0xed83f, 0xeda53, 0xedc48, 0xede3d, 0xee050, 0xee244, 0xee439, 0xee64d, 0xee842, 0xeea36, 0xeec4a, 0xeee3e, 0xef052, 0xef246, 0xef43a, 0xef64e, 0xef843, 0xefa37, 0xefc4b, 0xefe41, 0xf0054, 0xf0248, 0xf043c, 0xf0650, 0xf0845, 0xf0a38, 0xf0c4d, 0xf0e42, 0xf1037, 0xf124a, 0xf143e, 0xf1651, 0xf1846, 0xf1a3a, 0xf1c4e, 0xf1e44, 0xf2038, 0xf224b, 0xf243f, 0xf2653, 0xf2848, 0xf2a3b, 0xf2c4f, 0xf2e45, 0xf3039, 0xf324d, 0xf3442, 0xf3636, 0xf384a, 0xf3a3d, 0xf3c51, 0xf3e46, 0xf403b, 0xf424e, 0xf4443, 0xf4638, 0xf484c, 0xf4a3f, 0xf4c52, 0xf4e48, 0xf503c, 0xf524f, 0xf5445, 0xf5639, 0xf584d, 0xf5a42, 0xf5c35, 0xf5e49, 0xf603e, 0xf6251, 0xf6446, 0xf663b, 0xf684f, 0xf6a43, 0xf6c37, 0xf6e4b, 0xf703f, 0xf7252, 0xf7447, 0xf763c, 0xf7850, 0xf7a45, 0xf7c39, 0xf7e4d, 0xf8042, 0xf8254, 0xf8449, 0xf863d, 0xf8851, 0xf8a46, 0xf8c3b, 0xf8e4f, 0xf9044, 0xf9237, 0xf944a, 0xf963f, 0xf9853, 0xf9a47, 0xf9c3c, 0xf9e50, 0xfa045, 0xfa238, 0xfa44c, 0xfa641, 0xfa836, 0xfaa49, 0xfac3d, 0xfae52, 0xfb047, 0xfb23a, 0xfb44e, 0xfb643, 0xfb837, 0xfba4a, 0xfbc3f, 0xfbe53, 0xfc048, 0xfc23c, 0xfc450, 0xfc645, 0xfc839, 0xfca4c, 0xfcc41, 0xfce36, 0xfd04a, 0xfd23d, 0xfd451, 0xfd646, 0xfd83a, 0xfda4d, 0xfdc43, 0xfde37, 0xfe04b, 0xfe23f, 0xfe453, 0xfe648, 0xfe83c, 0xfea4f, 0xfec44, 0xfee38, 0xff04c, 0xff241, 0xff436, 0xff64a, 0xff83e, 0xffa51, 0xffc46, 0xffe3a, 0x10004e, 0x100242, 0x100437, 0x10064b, 0x100841, 0x100a53, 0x100c48, 0x100e3c, 0x10104f, 0x101244, 0x101438, 0x10164c, 0x101842, 0x101a35, 0x101c49, 0x101e3d, 0x102051, 0x102245, 0x10243a, 0x10264e, 0x102843, 0x102a37, 0x102c4b, 0x102e3f, 0x103053, 0x103247, 0x10343b, 0x10364f, 0x103845, 0x103a38, 0x103c4c, 0x103e42, 0x104036, 0x104249, 0x10443d, 0x104651, 0x104846, 0x104a3a, 0x104c4e, 0x104e43, 0x105038, 0x10524a, 0x10543e, 0x105652, 0x105847, 0x105a3b, 0x105c4f, 0x105e45, 0x106039, 0x10624c, 0x106441, 0x106635, 0x106849, 0x106a3d, 0x106c51, 0x106e47, 0x10703c, 0x10724f, 0x107444, 0x107638, 0x10784c, 0x107a3f, 0x107c53, 0x107e48];
+
+function GetBitInt(data, length, shift) {
+  return (data & (((1 << length) - 1) << shift)) >> shift;
+}
+function SolarToInt(y, m, d) {
+  m = (m + 9) % 12;
+  y = parseInt(y) - parseInt(m / 10);
+  return 365 * y + parseInt(y / 4) - parseInt(y / 100) + parseInt(y / 400) + parseInt((m * 306 + 5) / 10) + (d - 1);
+}
+function solarToLunar(sy, sm, sd) {
+  let index = sy - solar_1_1[0];
+  const data = (sy << 9) | (sm << 5) | sd;
+  if (solar_1_1[index] > data) index--;
+  const solar11 = solar_1_1[index];
+  const y0 = GetBitInt(solar11, 12, 9);
+  const m0 = GetBitInt(solar11, 4, 5);
+  const d0 = GetBitInt(solar11, 5, 0);
+  let offset = SolarToInt(sy, sm, sd) - SolarToInt(y0, m0, d0);
+
+  const days = lunar_month_days[index];
+  const leap = GetBitInt(days, 4, 13);
+  let lunarY = index + solar_1_1[0];
+  let lunarM = 1;
+  offset += 1;
+  for (let i = 0; i < 13; i++) {
+    const dm = GetBitInt(days, 1, 12 - i) === 1 ? 30 : 29;
+    if (offset > dm) { lunarM++; offset -= dm; } else { break; }
+  }
+  let isleap = false;
+  if (leap !== 0 && lunarM > leap) {
+    lunarM = lunarM - 1;
+    if (lunarM === leap) isleap = true;
+  }
+  return { year: lunarY, month: lunarM, day: parseInt(offset), isleap };
+}
+/* ---- 換算結束 ---- */
+
+function digitSum(n) {
+  return String(Math.abs(n)).split('').reduce((a, c) => a + Number(c), 0);
+}
+function reduceChain(n) {
+  const chain = [n];
+  while (n >= 10) {
+    n = digitSum(n);
+    chain.push(n);
+  }
+  return chain;
+}
+function fmtChain(chain) {
+  return chain.map((v, i) => {
+    const isLast = i === chain.length - 1;
+    return isLast ? `<span class="final-num">${v}</span>` : `<span>${v}</span>`;
+  }).join('<span class="arrow">→</span>');
+}
+
+const STAGES = [
+  { label: '老年能量', desc: '年紀漸長之後，會慢慢顯現出來的能量' },
+  { label: '中年能量', desc: '中年時期開始浮現、主導人生中段的能量' },
+  { label: '主要能量', desc: '從出生就跟著你、貫穿一生的核心能量' },
+];
+
+function runCalc(y, m, d) {
+  const yearChain = reduceChain(digitSum(y));
+  const monthRaw = yearChain[0] + digitSum(m);
+  const monthChain = reduceChain(monthRaw);
+  const dayRaw = monthChain[0] + digitSum(d);
+  const dayChain = reduceChain(dayRaw);
+  return [yearChain, monthChain, dayChain];
+}
+
+function renderPath(elId, chains) {
+  document.getElementById(elId).innerHTML = chains.map((chain, i) => `
+    <div class="stage${i === 2 ? ' final' : ''}">
+      <div class="stage-label">${STAGES[i].label}</div>
+      <div class="stage-chain">${fmtChain(chain)}</div>
+      <div class="stage-desc">${STAGES[i].desc}</div>
+    </div>
+  `).join('');
+}
+
+function render(y, m, d, isExample) {
+  // 國曆 → 事業
+  const careerChains = runCalc(y, m, d);
+  renderPath('pathCareer', careerChains);
+  document.getElementById('mainNumCareer').textContent = careerChains[2][careerChains[2].length - 1];
+
+  // 農曆 → 感情
+  const lunar = solarToLunar(y, m, d);
+  const loveChains = runCalc(lunar.year, lunar.month, lunar.day);
+  renderPath('pathLove', loveChains);
+  document.getElementById('mainNumLove').textContent = loveChains[2][loveChains[2].length - 1];
+  document.getElementById('lunarDateLabel').textContent =
+    `${lunar.year} 年 ${lunar.isleap ? '閏' : ''}${lunar.month} 月 ${lunar.day} 日`;
+
+  document.getElementById('exampleNote').style.display = isExample ? 'block' : 'none';
+}
+
+function calc() {
+  const y = parseInt(document.getElementById('y').value, 10);
+  const m = parseInt(document.getElementById('m').value, 10);
+  const d = parseInt(document.getElementById('d').value, 10);
+  if (!y || !m || !d || m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) {
+    alert('請完整輸入年、月、日（例如 1999 / 3 / 12），年份限 1900–2100');
+    return;
+  }
+  render(y, m, d, false);
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetForm() {
+  document.getElementById('y').value = '';
+  document.getElementById('m').value = '';
+  document.getElementById('d').value = '';
+  render(1999, 3, 12, true);
+  document.getElementById('y').focus();
+}
+
+render(1999, 3, 12, true);
+</script>
+
+</body>
+</html>
